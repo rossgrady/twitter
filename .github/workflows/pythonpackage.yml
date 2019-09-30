@@ -27,7 +27,6 @@ jobs:
         nosetests --with-coverage --cover-package=twitter
     - name: After tests
       run: |
-        pip install coveralls && coveralls
         pip install pycodestyle pyflakes
         pycodestyle twitter/*.py
         pyflakes twitter/*.py
