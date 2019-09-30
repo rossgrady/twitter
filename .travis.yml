@@ -7,6 +7,10 @@ python:
 - "3.3"
 - "3.4"
 - "3.5"
+- "3.6"
+- "3.6-dev"
+- "3.7-dev"
+- "nightly"
 - "pypy"
 
 # Use container-based infrastructure
@@ -20,11 +24,11 @@ install:
 script: nosetests --with-coverage --cover-package=twitter
 
 after_success:
-  - coveralls
-  - pip install pep8 pyflakes
-  - pep8 twitter/*.py
+  - pip install coveralls && coveralls
+  - pip install pycodestyle pyflakes
+  - pycodestyle twitter/*.py
   - pyflakes twitter/*.py
-  - pep8 tests/*.py
+  - pycodestyle tests/*.py
   - pyflakes tests/*.py
 
 matrix:

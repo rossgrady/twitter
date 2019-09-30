@@ -1,7 +1,13 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = '1.17.1'
+try:
+    import pypandoc
+    long_description = pypandoc.convert('README', 'rst', format='md')
+except ImportError:
+    long_description = open('./README', 'r').read()
+
+version = '1.18.0'
 
 install_requires = [
     # -*- Extra requirements: -*-
@@ -16,7 +22,7 @@ tests_require = [
 setup(name='twitter',
       version=version,
       description="An API and command-line toolset for Twitter (twitter.com)",
-      long_description=open("./README", "r").read(),
+      long_description=long_description,
       # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       classifiers=[
           "Development Status :: 5 - Production/Stable",
@@ -24,11 +30,17 @@ setup(name='twitter',
           "Intended Audience :: End Users/Desktop",
           "Natural Language :: English",
           "Operating System :: OS Independent",
+          "Programming Language :: Python :: 2",
           "Programming Language :: Python :: 2.6",
           "Programming Language :: Python :: 2.7",
+          "Programming Language :: Python :: 3",
           "Programming Language :: Python :: 3.2",
           "Programming Language :: Python :: 3.3",
           "Programming Language :: Python :: 3.4",
+          "Programming Language :: Python :: 3.5",
+          "Programming Language :: Python :: 3.6",
+          "Programming Language :: Python :: Implementation :: CPython",
+          "Programming Language :: Python :: Implementation :: PyPy",
           "Topic :: Communications :: Chat :: Internet Relay Chat",
           "Topic :: Internet :: WWW/HTTP :: Dynamic Content :: CGI Tools/Libraries",
           "Topic :: Utilities",

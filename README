@@ -1,7 +1,8 @@
 Python Twitter Tools
 ====================
 
-[![Build Status](https://travis-ci.org/sixohsix/twitter.svg)](https://travis-ci.org/sixohsix/twitter) [![Coverage Status](https://coveralls.io/repos/sixohsix/twitter/badge.png?branch=master)](https://coveralls.io/r/sixohsix/twitter?branch=master)
+[![Build Status](https://travis-ci.org/sixohsix/twitter.svg)](https://travis-ci.org/sixohsix/twitter)
+[![Coverage Status](https://coveralls.io/repos/github/sixohsix/twitter/badge.svg?branch=master)](https://coveralls.io/github/sixohsix/twitter?branch=master)
 
 The Minimalist Twitter API for Python is a Python API for Twitter,
 everyone's favorite Web 2.0 Facebook-style status updater for people
@@ -71,11 +72,11 @@ is decoded python objects (lists and dicts).
 
 The Twitter API is documented at:
 
-**[https://dev.twitter.com/overview/documentation](https://dev.twitter.com/overview/documentation)**
+**[https://developer.twitter.com/en/docs](https://developer.twitter.com/en/docs)**
 
 The list of most accessible functions is listed at:
 
-**[https://dev.twitter.com/rest/public](https://dev.twitter.com/rest/public)**
+**[https://developer.twitter.com/en/docs/api-reference-index](https://developer.twitter.com/en/docs/api-reference-index)**
 
 Examples:
 
@@ -102,9 +103,15 @@ t.statuses.update(
     status="Using @sixohsix's sweet Python Twitter Tools.")
 
 # Send a direct message
-t.direct_messages.new(
-    user="billybob",
-    text="I think yer swell!")
+t.direct_messages.events.new(
+    _json={
+        "event": {
+            "type": "message_create",
+            "message_create": {
+                "target": {
+                    "recipient_id": t.users.show(screen_name="billybob")["id"]},
+                "message_data": {
+                    "text": "I think yer swell!"}}}})
 
 # Get the members of tamtar's list "Things That Are Rad"
 t.lists.members(owner_screen_name="tamtar", slug="things-that-are-rad")
@@ -148,12 +155,17 @@ t_upload.media.metadata.create(_json={
   "media_id": id_img1,
   "alt_text": { "text": "metadata generated via PTT!" }
 })
+# or with the shortcut arguments ("alt_text" and "text" work):
+t_upload.media.metadata.create(media_id=id_img1, text="metadata generated via PTT!")
 ```
 
 Searching Twitter:
 ```python
 # Search for the latest tweets about #pycon
 t.search.tweets(q="#pycon")
+
+# Search for the latest tweets about #pycon, using [extended mode](https://developer.twitter.com/en/docs/tweets/tweet-updates)
+t.search.tweets(q="#pycon", tweet_mode='extended')
 ```
 
 
@@ -161,8 +173,8 @@ Retrying after reaching the API rate limit
 ------------------------------------------
 
 Simply create the `Twitter` instance with the argument `retry=True`, then the
-HTTP error codes `429`, `502`, `503`, and `504` will cause a retry of the last 
-request. 
+HTTP error codes `429`, `502`, `503`, and `504` will cause a retry of the last
+request.
 
 If `retry` is an integer, it defines the maximum number of retry attempts.
 
@@ -216,41 +228,15 @@ Per default the `TwitterStream` object uses
 [public streams](https://dev.twitter.com/docs/streaming-apis/streams/public).
 If you want to use one of the other
 [streaming APIs](https://dev.twitter.com/docs/streaming-apis), specify the URL
-manually:
-
-- [Public streams](https://dev.twitter.com/docs/streaming-apis/streams/public): stream.twitter.com
-- [User streams](https://dev.twitter.com/docs/streaming-apis/streams/user): userstream.twitter.com
-- [Site streams](https://dev.twitter.com/docs/streaming-apis/streams/site): sitestream.twitter.com
-
-Note that you require the proper
-[permissions](https://dev.twitter.com/docs/application-permission-model) to
-access these streams. (E.g., for direct messages, your
-[application](https://dev.twitter.com/apps) needs the "Read, Write & Direct
-Messages" permission.)
-
-The following example demonstrates how to retrieve all new direct messages
-from the user stream:
-
-```python
-auth = OAuth(
-    consumer_key='[your consumer key]',
-    consumer_secret='[your consumer secret]',
-    token='[your token]',
-    token_secret='[your token secret]'
-)
-twitter_userstream = TwitterStream(auth=auth, domain='userstream.twitter.com')
-for msg in twitter_userstream.user():
-    if 'direct_message' in msg:
-        print msg['direct_message']['text']
-```
+manually.
 
 The iterator will `yield` until the TCP connection breaks. When the
 connection breaks, the iterator yields `{'hangup': True}` (and
 raises `StopIteration` if iterated again).
 
 Similarly, if the stream does not produce heartbeats for more than
-90 seconds, the iterator yields `{'hangup': True, 
-'heartbeat_timeout': True}` (and raises `StopIteration` if 
+90 seconds, the iterator yields `{'hangup': True,
+'heartbeat_timeout': True}` (and raises `StopIteration` if
 iterated again).
 
 The `timeout` parameter controls the maximum time between
@@ -259,12 +245,12 @@ stream data or `{'timeout': True}` within the timeout period. This
 is useful if you want your program to do other stuff in between
 waiting for tweets.
 
-The `block` parameter sets the stream to be fully non-blocking. 
+The `block` parameter sets the stream to be fully non-blocking.
 In this mode, the iterator always yields immediately. It returns
-stream data, or `None`. 
+stream data, or `None`.
 
-Note that `timeout` supercedes this argument, so it should also be 
-set `None` to use this mode, and non-blocking can potentially lead 
+Note that `timeout` supercedes this argument, so it should also be
+set `None` to use this mode, and non-blocking can potentially lead
 to 100% CPU usage.
 
 Twitter `Response` Objects
@@ -275,7 +261,7 @@ Response from a Twitter request. Behaves like a list or a string
 attributes.
 
 `headers` gives you access to the response headers as an
-`httplib.HTTPHeaders` instance. Use `response.headers.get('h')` 
+`httplib.HTTPHeaders` instance. Use `response.headers.get('h')`
 to retrieve a header.
 
 Authentication
@@ -324,7 +310,7 @@ if not os.path.exists(MY_TWITTER_CREDS):
 oauth_token, oauth_secret = read_token_file(MY_TWITTER_CREDS)
 
 twitter = Twitter(auth=OAuth(
-    oauth_token, oauth_token_secret, CONSUMER_KEY, CONSUMER_SECRET))
+    oauth_token, oauth_secret, CONSUMER_KEY, CONSUMER_SECRET))
 
 # Now work with Twitter
 twitter.statuses.update(status='Hello, world!')

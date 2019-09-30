@@ -9,6 +9,7 @@ ACTIONS:
  authorize      authorize the command-line tool to interact with Twitter
  follow         follow a user
  friends        get latest tweets from your friends (default action)
+ user           get latest tweets from a specific user
  help           print this help text that you are currently reading
  leave          stop following a user
  list           get list of a user's lists; give a list name to get
@@ -540,6 +541,18 @@ class FriendsAction(StatusAction):
             twitter.statuses.home_timeline(count=options["length"])))
 
 
+class UserAction(StatusAction):
+    def getStatuses(self, twitter, options):
+        if not options['extra_args']:
+            raise TwitterError("You need to specify a user (screen name)")
+
+        screen_name = options['extra_args'][0]
+
+        return list(reversed(
+            twitter.statuses.user_timeline(screen_name=screen_name,
+                                           count=options["length"])))
+
+
 class RepliesAction(StatusAction):
     def getStatuses(self, twitter, options):
         return list(reversed(
@@ -561,6 +574,7 @@ class SetStatusAction(Action):
         statusTxt = (" ".join(options['extra_args'])
                      if options['extra_args']
                      else str(input("message: ")))
+        statusTxt = statusTxt.replace('\\n', '\n')
         replies = []
         ptr = re.compile("@[\w_]+")
         while statusTxt:
@@ -571,14 +585,14 @@ class SetStatusAction(Action):
             else:
                 break
         replies = " ".join(replies)
-        if len(replies) >= 140:
+        if len(replies) >= 280:
             # just go back
             statusTxt = replies
             replies = ""
 
         splitted = []
         while statusTxt:
-            limit = 140 - len(replies)
+            limit = 280 - len(replies)
             if len(statusTxt) > limit:
                 end = str.rfind(statusTxt, ' ', 0, limit)
             else:
@@ -698,6 +712,7 @@ actions = {
     'authorize' : DoNothingAction,
     'follow'    : FollowAction,
     'friends'   : FriendsAction,
+    'user'      : UserAction,
     'list'      : ListsAction,
     'mylist'    : MyListsAction,
     'help'      : HelpAction,
