@@ -23,6 +23,7 @@ jobs:
     - name: Test with nose
       run: |
         pip install nose
+        pip install coverage
         nosetests --with-coverage --cover-package=twitter
     - name: After tests
       run: |
